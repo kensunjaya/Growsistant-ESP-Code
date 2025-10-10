@@ -1,5 +1,6 @@
 #include <WiFiClientSecure.h>
 #include <ESP8266WiFi.h>
+#include <WiFiManager.h> 
 #include <PubSubClient.h>
 #include <Wire.h>
 #include <BH1750.h>
@@ -49,7 +50,6 @@ void reconnect() {
     String clientId = "ESP8266Client-" + String(random(0xffff), HEX);
     if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASS)) {
       Serial.println("connected");
-      client.publish(MQTT_TOPIC, "Hello from ESP8266");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -61,18 +61,21 @@ void reconnect() {
 
 void setup() {
   Serial.begin(9600);
+  WiFiManager wifiManager;
   Wire.begin();
   lightMeter.begin();
   dht.begin();
-
+  
   pinMode(PUMP_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
+  
+//  setup_wifi();
+  wifiManager.autoConnect("Growsistant-Setup");
+  Serial.println("WiFi connected.");
+  Serial.println(WiFi.localIP());
   espClient.setInsecure();
-
-  setup_wifi();
+  
   client.setServer(MQTT_SERVER, MQTT_PORT);
-  client.setKeepAlive(60);
-  client.setSocketTimeout(60); 
 }
 
 void loop() {
